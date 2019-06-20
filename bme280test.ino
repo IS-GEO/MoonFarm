@@ -39,6 +39,7 @@
 Adafruit_BME280 bme; // I2C
 Thermistor *thermistor; // thermistor
 Adafruit_CCS811 ccs; // CO2
+FuelGauge fuel; // to monitor battery
 // Adafruit_CCS811 ccs; 
 
 //Adafruit_BME280 bme(BME_CS); // hardware SPI
@@ -126,14 +127,15 @@ void loop()
     
     //Pull Sensor data to variables
     // char json[] = "{\"hello\":\"world\"}";
-    float sm6      = moisture_percentage_sm6;  // shallow soil moisture sensor: percent of raw
-    float sm18     = moisture_percentage_sm18; // deep soil moisture sensor: percent of raw
-    float st6      = soil_temperature;         // shallow soil temp (C)
-    int eCO2       = eCO2_read;                        // set garbage value and replace
-    float surft    = bme.readTemperature();    // surface temperature
-    float rh       = bme.readHumidity();       // relative humidity
-    float sm6_raw  = moisture_analog_sm6;      // shallow raw soil moisture: raw
-    float sm18_raw = moisture_analog_sm18;     // deep raw soil moisture: raw
+    float sm6      = moisture_percentage_sm6;       // shallow soil moisture sensor: percent of raw
+    float sm18     = moisture_percentage_sm18;      // deep soil moisture sensor: percent of raw
+    float st6      = soil_temperature;              // shallow soil temp (C)
+    int eCO2       = eCO2_read;                     // set garbage value and replace
+    float surft    = bme.readTemperature();         // surface temperature
+    float rh       = bme.readHumidity();            // relative humidity
+    float sm6_raw  = moisture_analog_sm6;           // shallow raw soil moisture: raw
+    float sm18_raw = moisture_analog_sm18;          // deep raw soil moisture: raw
+    float bp       = (fuel.getSoC() / 81.24) * 100; // Battery State of Charge, where 81.24 is max value
     
     // Format string for submission to CHORDS
     String data = String::format(
@@ -145,7 +147,8 @@ void loop()
         "\"surft\":%.2f,"
         "\"rh\":%.2f,"
         "\"sm6_raw\":%.2f,"
-        "\"sm18_raw\":%.2f"
+        "\"sm18_raw\":%.2f,"
+        "\"bp\":%.2f"
       "}",
       sm6,
       sm18,
@@ -154,7 +157,8 @@ void loop()
       surft,
       rh,
       sm6_raw,
-      sm18_raw);
+      sm18_raw,
+      bp);
       
     Particle.publish("MoonFarm", data, PRIVATE);
     delay(60000);
