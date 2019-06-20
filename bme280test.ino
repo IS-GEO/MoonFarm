@@ -1,4 +1,7 @@
 // This #include statement was automatically added by the Particle IDE.
+#include <Adafruit_CCS811.h>
+
+// This #include statement was automatically added by the Particle IDE.
 #include <photon-thermistor.h>
 
 /***************************************************************************
@@ -35,11 +38,12 @@
 
 Adafruit_BME280 bme; // I2C
 Thermistor *thermistor; // thermistor
+Adafruit_CCS811 ccs; // CO2
 // Adafruit_CCS811 ccs; 
 
 //Adafruit_BME280 bme(BME_CS); // hardware SPI
 //Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
-
+
 unsigned long delayTime;
 
 int moisture_pin_sm6  = A0; // upper soil moisture
@@ -52,6 +56,9 @@ void setup()
     while (!Serial)
         ; // time to get serial running
     Serial.println(F("BME280 test"));
+    
+    // initialize ccs811
+    ccs.begin();
 
     unsigned status;
 
@@ -95,6 +102,15 @@ void setup()
 
 void loop()
 {
+    // co2
+    int eCO2_read = 0;
+    
+    if (ccs.available()){
+        bool error = ccs.readData(); //returns True if an error occurs during the read
+        int eCO2_read = ccs.geteCO2(); //returns eCO2 reading
+        int TVOC = ccs.getTVOC(); //return TVOC reading
+    }
+    
     // soil temp
     double soil_temperature = thermistor->readTempC();
     
@@ -113,7 +129,7 @@ void loop()
     float sm6      = moisture_percentage_sm6;  // shallow soil moisture sensor: percent of raw
     float sm18     = moisture_percentage_sm18; // deep soil moisture sensor: percent of raw
     float st6      = soil_temperature;         // shallow soil temp (C)
-    float eCO2     = 0;                        // set garbage value and replace
+    int eCO2       = eCO2_read;                        // set garbage value and replace
     float surft    = bme.readTemperature();    // surface temperature
     float rh       = bme.readHumidity();       // relative humidity
     float sm6_raw  = moisture_analog_sm6;      // shallow raw soil moisture: raw
