@@ -135,7 +135,7 @@ void loop()
     float rh       = bme.readHumidity();            // relative humidity
     float sm6_raw  = moisture_analog_sm6;           // shallow raw soil moisture: raw
     float sm18_raw = moisture_analog_sm18;          // deep raw soil moisture: raw
-    float bp       = (fuel.getSoC() / 81.24) * 100; // Battery State of Charge, where 81.24 is max value
+    float bp       = fuel.getSoC();/// 81.24) * 100;// Battery State of Charge, where 81.24 is max value
     
     // Format string for submission to CHORDS
     String data = String::format(
